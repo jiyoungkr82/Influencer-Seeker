@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Influencer Matcher</title>
+    <!-- Google Fonts & Bootstrap & FontAwesome -->
+    <link href="https://fonts.googleapis.com" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com">
+    <style>
+        body {
+            font-family: 'Pretendard', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+        .main-container { max-width: 800px; margin-top: 80px; }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 30px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+        }
+        .search-input {
+            border-radius: 15px !important;
+            padding: 15px 25px;
+            border: none;
+            box-shadow: inset 2px 2px 5px rgba(0,0,0,0.05);
+        }
+        .btn-search {
+            border-radius: 15px !important;
+            padding: 10px 30px;
+            font-weight: 600;
+            background: #4facfe;
+            border: none;
+            transition: 0.3s;
+        }
+        .btn-search:hover { background: #00f2fe; transform: translateY(-2px); }
+        .influencer-card {
+            border-radius: 15px;
+            border: none;
+            transition: all 0.3s ease;
+            overflow: hidden;
+            background: white;
+        }
+        .influencer-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+        }
+        .badge-style { background: #e0e7ff; color: #4338ca; border-radius: 8px; padding: 5px 12px; }
+        .loader { display: none; margin: 20px auto; }
+    </style>
+</head>
+<body>
+
+<div class="container main-container">
+    <div class="text-center mb-5">
+        <h1 class="fw-bold mb-2">🤖 AI Influencer Matcher</h1>
+        <p class="text-muted">GPT-3.5가 분석하는 가장 완벽한 인플루언서 매칭</p>
+    </div>
+
+    <!-- Search Section -->
+    <div class="glass-card mb-5">
+        <div class="input-group">
+            <input id="productName" type="text" class="form-control search-input"
+                   placeholder="어떤 상품인가요? (예: 키치한 느낌의 립스틱 추천해줘)">
+            <button onclick="search()" class="btn btn-primary btn-search shadow-sm">
+                <i class="fa-solid fa-wand-magic-sparkles me-2"></i>분석 시작
+            </button>
+        </div>
+    </div>
+
+    <!-- Loading -->
+    <div id="loader" class="text-center loader">
+        <div class="spinner-border text-primary" role="status"></div>
+        <p class="mt-2 text-muted small">AI가 최적의 매칭을 분석 중입니다...</p>
+    </div>
+
+    <!-- Result Section -->
+    <div id="result" class="row g-4">
+        <!-- 결과가 여기에 동적으로 렌더링됩니다 -->
+    </div>
+</div>
+
+<script>
+    async function search() {
+        const name = document.getElementById('productName').value;
+        const loader = document.getElementById('loader');
+        const resultDiv = document.getElementById('result');
+
+        if(!name) { alert("상품 설명을 입력해주세요!"); return; }
+
+        // 로딩 시작
+        loader.style.display = 'block';
+        resultDiv.innerHTML = '';
+
+        try {
+            const res = await fetch(`/api/match?productName=${name}`);
+            const data = await res.json();
+
+            loader.style.display = 'none';
+
+            if (data.length > 0) {
+                resultDiv.innerHTML = data.map(inf => `
+                    <div class="col-md-6">
+                        <div class="card influencer-card p-3 shadow-sm">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-shrink-0">
+                                    <div class="rounded-circle bg-light d-flex align-items-center justify-content-center" style="width:60px; height:60px;">
+                                        <i class="fa-solid fa-user-tie fa-xl text-secondary"></i>
+                                    </div>
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <h5 class="mb-1 fw-bold">${inf.name}</h5>
+                                    <div class="d-flex gap-2">
+                                        <span class="badge bg-primary small">${inf.category}</span>
+                                        <span class="badge badge-style small">${inf.style || 'MODERN'}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                resultDiv.innerHTML = '<p class="text-center text-muted">매칭된 인플루언서가 없습니다. 다시 시도해 보세요!</p>';
+            }
+        } catch (error) {
+            loader.style.display = 'none';
+            alert("서버 연결에 실패했습니다.");
+        }
+    }
+</script>
+
+<script src="https://cdn.jsdelivr.net"></script>
+</body>
+</html>
