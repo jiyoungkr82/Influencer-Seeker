@@ -27,7 +27,7 @@ public class MatchService {
     @Value("${openai.api.key}")
     private String apiKey;
 
-    @Value("${openai.api.url}") // YAML에서 https://api.openai.com 수정 필요
+    @Value("${openai.api.url}")
     private String apiUrl;
 
     @Value("${openai.prompt.matching}")
